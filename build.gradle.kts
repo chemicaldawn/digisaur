@@ -10,6 +10,7 @@ application {
     mainClass = "info.dawns.Main"
 }
 
+
 repositories {
     mavenCentral()
 }
@@ -30,6 +31,12 @@ dependencies {
     implementation("com.google.apis:google-api-services-sheets:v4-rev20220927-2.0.0")
 }
 
+tasks.withType(Jar::class) {
+    manifest {
+        attributes["Manifest-Version"] = "1.0"
+        attributes["Main-Class"] = "info.dawns.Main"
+    }
+}
 tasks.test {
     useJUnitPlatform()
 }
