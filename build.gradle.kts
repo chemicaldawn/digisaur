@@ -15,6 +15,12 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    main {
+        resources.srcDirs("src/main/resources")
+    }
+}
+
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -37,6 +43,7 @@ tasks.withType(Jar::class) {
         attributes["Main-Class"] = "info.dawns.Main"
     }
 }
+
 tasks.test {
     useJUnitPlatform()
 }
