@@ -39,7 +39,7 @@ dependencies {
 
 tasks.withType(Jar::class) {
 
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
         attributes["Manifest-Version"] = "1.0"
