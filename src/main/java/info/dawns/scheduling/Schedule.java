@@ -4,18 +4,7 @@ import java.util.*;
 
 public class Schedule {
 
-    public enum Day {
-        ANY_DAY,
-        SUNDAY,
-        MONDAY,
-        TUESDAY,
-        WEDNESDAY,
-        THURSDAY,
-        FRIDAY,
-        SATURDAY
-    }
-
-    private Map<Day, List<Shift>> internalSchedule;
+    private Map<Day, List<ShiftType>> internalSchedule;
 
     public Schedule() {
         this.internalSchedule = new TreeMap<>();
@@ -27,19 +16,19 @@ public class Schedule {
     protected void addShifts(Day day, String shifts) {
         for (String s : shifts.split(", ")) {
             if (!s.equals("None")) {
-                internalSchedule.get(day).add(Shift.fromName(s));
+                internalSchedule.get(day).add(ShiftType.fromName(s));
             }
         }
     }
 
-    public List<Shift> getShiftsFor(Day day) {
+    public List<ShiftType> getShiftsFor(Day day) {
         return internalSchedule.get(day);
     }
 
-    public Set<Shift> getAllShifts() {
-        Set<Shift> agg = new HashSet<>();
+    public Set<ShiftType> getAllShifts() {
+        Set<ShiftType> agg = new HashSet<>();
 
-        for (List<Shift> l : internalSchedule.values()) {
+        for (List<ShiftType> l : internalSchedule.values()) {
             agg.addAll(l);
         }
 

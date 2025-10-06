@@ -1,4 +1,4 @@
-package info.dawns.bot;
+package info.dawns.initialization.scaffolding;
 
 public class DiscordCredentials {
     private String botToken;

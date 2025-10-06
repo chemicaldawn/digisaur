@@ -1,0 +1,17 @@
+{
+  "discord" : {
+    "nickname" : "Digisaur",
+    "accent-color" : 11989905
+  },
+
+  "google" : {
+    "workshift-tracker-id" : "1gpQzXMmPaIn2ZTgCOpaWtwkS24z5nE8_azgJWlYqEpU"
+  },
+
+  "features-enabled" : {
+    "workshift-verification": true,
+    "workshift-market": true,
+
+    "admin-speech" : true
+  }
+}

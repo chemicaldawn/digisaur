@@ -1,23 +1,27 @@
-package info.dawns.bot;
+package info.dawns.initialization;
 
 import com.google.gson.Gson;
-import info.dawns.authorization.Google;
+import info.dawns.initialization.scaffolding.DiscordCredentials;
+import info.dawns.bot.listeners.BotButtonListener;
+import info.dawns.bot.listeners.BotSlashCommandListener;
+import info.dawns.bot.listeners.BotStringSelectListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
-import java.io.*;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Collections;
 
-public class BotInitializer {
+public class Discord {
     public static JDA initializeBot() {
-        ClassLoader loader = BotInitializer.class.getClassLoader();
+        ClassLoader loader = Discord.class.getClassLoader();
         Reader reader = new InputStreamReader(loader.getResourceAsStream(".env/discord/credentials.json"));
         String discordToken = (new Gson()).fromJson(reader, DiscordCredentials.class).getToken();
         return JDABuilder.createLight(discordToken, Collections.emptyList())
                 .enableIntents(
                         GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS)
-                .addEventListeners(new BotCommandListener())
+                .addEventListeners(new BotSlashCommandListener(), new BotButtonListener(), new BotStringSelectListener())
                 .build();
     }
 }

@@ -17,7 +17,7 @@ repositories {
 
 sourceSets {
     main {
-        resources.srcDirs("src/main/resources")
+        resources.srcDirs("src/main/config","src/main/data")
     }
 }
 
