@@ -38,13 +38,15 @@ dependencies {
 }
 
 tasks.withType(Jar::class) {
-
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
+    
     manifest {
         attributes["Manifest-Version"] = "1.0"
         attributes["Main-Class"] = "info.dawns.Main"
     }
+}
+
+tasks.withType(Copy::class) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.test {
