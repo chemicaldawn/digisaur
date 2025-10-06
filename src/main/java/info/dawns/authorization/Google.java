@@ -27,12 +27,13 @@ public class Google {
     private static final String TOKENS_DIRECTORY_PATH = ".env";
 
     public static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
-    private static final String CREDENTIALS_FILE_PATH = "/.env/google/credentials.json";
+    private static final String CREDENTIALS_FILE_PATH = ".env/google/credentials.json";
 
     public static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
             throws IOException {
         // Load client secrets.
-        InputStream in = Google.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        ClassLoader loader = Google.class.getClassLoader();
+        InputStream in = loader.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }

@@ -15,7 +15,8 @@ import java.util.Collections;
 public class BotInitializer {
     public static JDA initializeBot() {
         try {
-            Reader reader = new FileReader(BotInitializer.class.getResource("/.env/discord/credentials.json").getFile());
+            ClassLoader loader = BotInitializer.class.getClassLoader();
+            Reader reader = new FileReader(loader.getResource(".env/discord/credentials.json").getFile());
             String discordToken = (new Gson()).fromJson(reader, DiscordCredentials.class).getToken();
             return JDABuilder.createLight(discordToken, Collections.emptyList())
                     .enableIntents(
