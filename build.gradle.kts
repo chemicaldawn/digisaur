@@ -38,7 +38,7 @@ dependencies {
 }
 
 tasks.withType(Jar::class) {
-    
+
     manifest {
         attributes["Manifest-Version"] = "1.0"
         attributes["Main-Class"] = "info.dawns.Main"
