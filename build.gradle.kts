@@ -38,6 +38,9 @@ dependencies {
 }
 
 tasks.withType(Jar::class) {
+
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
     manifest {
         attributes["Manifest-Version"] = "1.0"
         attributes["Main-Class"] = "info.dawns.Main"
