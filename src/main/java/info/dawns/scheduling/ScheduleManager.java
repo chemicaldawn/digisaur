@@ -10,12 +10,16 @@ import info.dawns.initialization.Google;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
 public class ScheduleManager {
+
+    public static Logger scheduleManagerLogger = LoggerFactory.getLogger(ScheduleManager.class);
 
     private static NetHttpTransport netHttpTransport;
     private static Credential googleCredentials;
@@ -43,14 +47,16 @@ public class ScheduleManager {
             throw new RuntimeException(e);
         }
 
+        scheduleManagerLogger.info("Connecting to the Google Sheets API");
+
         sheets = new Sheets.Builder(netHttpTransport, Google.JSON_FACTORY, googleCredentials)
                 .setApplicationName(Constants.APPLICATION_NAME)
                 .build();
-
-        updateCaches();
     }
 
     public static void updateCaches() {
+        scheduleManagerLogger.info("Updating caches");
+
         buildNameMap();
         buildScheduleMap();
     }
@@ -70,7 +76,7 @@ public class ScheduleManager {
     }
 
     private static void buildScheduleMap() {
-        List<List<String>> dictionaryData = getRange("Workshift Dictionary!A2:D43");
+        List<List<String>> dictionaryData = getRange("Workshift Dictionary!A2:D42");
 
         scheduleByUser = new HashMap<>();
         bonusShiftTypes = new HashSet<>();
@@ -78,7 +84,7 @@ public class ScheduleManager {
         questShiftTypes = new HashSet<>();
 
         for (List<String> row : dictionaryData) {
-            ShiftType newShiftType = new ShiftType(row.get(0), Double.valueOf(row.get(1)), "", Emoji.fromUnicode(row.get(2)), String.valueOf(row.get(3)));
+            ShiftType newShiftType = new ShiftType(row.get(0), Double.valueOf(row.get(1)), "", Emoji.fromUnicode(row.get(2)), String.valueOf(row.get(3)).toLowerCase());
             ShiftType.shiftTypeRegistry.add(newShiftType);
 
             if (newShiftType.type.equals("bonus")) {

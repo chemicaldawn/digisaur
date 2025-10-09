@@ -2,6 +2,7 @@ package info.dawns.bot.listeners;
 
 import info.dawns.Constants;
 import info.dawns.bot.Bot;
+import info.dawns.bot.BotUtils;
 import info.dawns.scheduling.ScheduleManager;
 import info.dawns.scheduling.ShiftType;
 import info.dawns.scheduling.VerificationContext;
@@ -12,24 +13,27 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class BotStringSelectListener extends ListenerAdapter {
+
+    public static Logger verificationLogger = LoggerFactory.getLogger("Verification");
+
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         switch(event.getComponentId()) {
             case "verification": {
                 long id = event.getUser().getIdLong();
                 VerificationContext ctx = Bot.verificationMemory.getOrDefault(event.getUser().getIdLong(), null);
+                ShiftType selection = ShiftType.fromId(event.getValues().get(0));
 
                 if (ctx == null) {
-                    event.reply("Dawn fucked up. Send her a screenshot of this message RN.")
-                            .queue();
-                    return;
+                    verificationLogger.warn("Null verification context recieved");
                 }
 
-                ShiftType selection = ShiftType.shiftTypeRegistry.get(event.getValues().get(0));
                 try {
                     ScheduleManager.verify(event.getUser().getIdLong(), selection);
                 } catch (IOException e) {
@@ -47,7 +51,10 @@ public class BotStringSelectListener extends ListenerAdapter {
                     }
                 }
 
-                event.reply("**" + selection.getName() + "** successfully verified for " + String.valueOf(selection.defaultHoursAward) + " hour(s)!")
+                String hoursString = BotUtils.hoursString(selection.defaultHoursAward);
+                verificationLogger.info(event.getUser().getEffectiveName() + " verified " + selection.getName() + " for " + hoursString);
+
+                event.reply("**" + selection.getName() + "** successfully verified for " + hoursString + "!")
                         .setEphemeral(true)
                         .and(
                                 event.getChannel().addReactionById(ctx.messageId, Emoji.fromUnicode("\uD83E\uDD95")))
@@ -56,7 +63,7 @@ public class BotStringSelectListener extends ListenerAdapter {
             }
 
             case "sell": {
-                ShiftType selection = ShiftType.fromName(event.getValues().get(0));
+                ShiftType selection = ShiftType.fromId(event.getValues().get(0));
                 long saleId = event.getIdLong();
                 Bot.marketMemory.put(saleId, selection);
 

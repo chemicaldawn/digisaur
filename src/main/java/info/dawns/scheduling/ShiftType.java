@@ -22,8 +22,8 @@ public class ShiftType implements RegistryItem {
     public String type;
 
     public ShiftType(String name, double defaultHoursAward, String description, Emoji emoji, String type) {
-        this.name = this.name;
-        this.id = this.name.toLowerCase(Locale.ROOT).replaceAll("\\s+\\+?\\s*","-");
+        this.name = name;
+        this.id = toId(this.name);
 
         this.defaultHoursAward = defaultHoursAward;
         this.description = description;
@@ -46,7 +46,15 @@ public class ShiftType implements RegistryItem {
     }
 
     public static ShiftType fromName(String name) {
-        return shiftTypeRegistry.get(name);
+        return shiftTypeRegistry.get(toId(name));
+    }
+
+    public static ShiftType fromId(String id) {
+        return shiftTypeRegistry.get(id);
+    }
+
+    private static String toId(String name) {
+        return name.toLowerCase(Locale.ROOT).replaceAll("\\s+\\+?\\s*","-");
     }
 
     public String toString() {
@@ -64,7 +72,7 @@ public class ShiftType implements RegistryItem {
 
     @Override
     public String getKey() {
-        return this.name;
+        return this.id;
     }
 
     @Override

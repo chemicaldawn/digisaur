@@ -10,6 +10,8 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class Google {
+    public static Logger googleInitializationLogger = LoggerFactory.getLogger(Google.class);
+
     private static final String APPLICATION_NAME = "Digisaur";
     public static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = ".env";
@@ -27,12 +31,16 @@ public class Google {
     private static final String CREDENTIALS_FILE_PATH = ".env/google/credentials.json";
 
     public static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+        googleInitializationLogger.info("Reading Google credentials");
+
         ClassLoader loader = Google.class.getClassLoader();
         InputStream in = loader.getResourceAsStream(CREDENTIALS_FILE_PATH);
 
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
+
+        googleInitializationLogger.info("Loading client secrets");
 
         GoogleClientSecrets clientSecrets =
                 GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));

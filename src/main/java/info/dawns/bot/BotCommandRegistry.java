@@ -68,7 +68,7 @@ public class BotCommandRegistry {
                     Bot.verificationMemory.put(e.getUser().getIdLong(),
                             new VerificationContext(verificationMessage.getIdLong(), workshiftType));
 
-                    if (shifts.size() != 0) {
+                    if (shiftTypeOptions.size() != 0) {
                         e.reply("Choose the shift you would like to verify...")
                                 .addActionRow(StringSelectMenu.create("verification")
                                         .addOptions(BotUtils.selectOptionsFor(shiftTypeOptions))
@@ -124,7 +124,7 @@ public class BotCommandRegistry {
                     long id = e.getUser().getIdLong();
                     String shifts = "";
 
-                    List<ShiftType> schedule = ScheduleManager.getSchedule(id).getShiftsFor(d);
+                    Set<ShiftType> schedule = ScheduleManager.getSchedule(id).getShiftsFor(d);
                     for (ShiftType s : schedule) {
                         shifts += s.getName() + "\n";
                     }

@@ -4,12 +4,12 @@ import java.util.*;
 
 public class Schedule {
 
-    private Map<Day, List<ShiftType>> internalSchedule;
+    private Map<Day, Set<ShiftType>> internalSchedule;
 
     public Schedule() {
         this.internalSchedule = new TreeMap<>();
         for (Day day : Day.values()) {
-            internalSchedule.put(day, new ArrayList<>());
+            internalSchedule.put(day, new HashSet<>());
         }
     }
 
@@ -21,14 +21,14 @@ public class Schedule {
         }
     }
 
-    public List<ShiftType> getShiftsFor(Day day) {
+    public Set<ShiftType> getShiftsFor(Day day) {
         return internalSchedule.get(day);
     }
 
     public Set<ShiftType> getAllShifts() {
         Set<ShiftType> agg = new HashSet<>();
 
-        for (List<ShiftType> l : internalSchedule.values()) {
+        for (Set<ShiftType> l : internalSchedule.values()) {
             agg.addAll(l);
         }
 

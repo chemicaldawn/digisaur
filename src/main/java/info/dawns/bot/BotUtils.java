@@ -49,4 +49,14 @@ public class BotUtils {
 
         return optionList;
     }
+
+    public static String hoursString(double hours) {
+        if (hours - Math.floor(hours) > 0D) {
+            return String.valueOf(hours) + " hours";
+        } else if (hours == 1D) {
+            return "1 hour";
+        } else {
+            return String.valueOf((int) hours) + " hours";
+        }
+    }
 }

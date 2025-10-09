@@ -5,9 +5,11 @@ import info.dawns.initialization.Discord;
 import info.dawns.bot.BotCommandRegistry;
 import info.dawns.initialization.scaffolding.Config;
 import info.dawns.initialization.scaffolding.DiscordCredentials;
+import info.dawns.scheduling.ScheduleManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import org.slf4j.Logger;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -28,5 +30,7 @@ public class Main {
 
         commands.addCommands(BotCommandRegistry.apiRegistry);
         commands.queue();
+
+        ScheduleManager.updateCaches();
     }
 }
