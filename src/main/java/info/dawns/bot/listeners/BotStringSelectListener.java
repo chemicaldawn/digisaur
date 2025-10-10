@@ -4,6 +4,7 @@ import info.dawns.Constants;
 import info.dawns.bot.Bot;
 import info.dawns.bot.BotUtils;
 import info.dawns.scheduling.ScheduleManager;
+import info.dawns.scheduling.Shift;
 import info.dawns.scheduling.ShiftType;
 import info.dawns.scheduling.VerificationContext;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -28,7 +29,7 @@ public class BotStringSelectListener extends ListenerAdapter {
             case "verification": {
                 long id = event.getUser().getIdLong();
                 VerificationContext ctx = Bot.verificationMemory.getOrDefault(event.getUser().getIdLong(), null);
-                ShiftType selection = ShiftType.fromId(event.getValues().get(0));
+                Shift selection = Shift.fromId(event.getValues().get(0));
 
                 if (ctx == null) {
                     verificationLogger.warn("Null verification context recieved");
@@ -51,7 +52,7 @@ public class BotStringSelectListener extends ListenerAdapter {
                     }
                 }
 
-                String hoursString = BotUtils.hoursString(selection.defaultHoursAward);
+                String hoursString = BotUtils.hoursString(selection.getHours());
                 verificationLogger.info(event.getUser().getEffectiveName() + " verified " + selection.getName() + " for " + hoursString);
 
                 event.reply("**" + selection.getName() + "** successfully verified for " + hoursString + "!")
@@ -63,7 +64,7 @@ public class BotStringSelectListener extends ListenerAdapter {
             }
 
             case "sell": {
-                ShiftType selection = ShiftType.fromId(event.getValues().get(0));
+                Shift selection = Shift.fromId(event.getValues().get(0));
                 long saleId = event.getIdLong();
                 Bot.marketMemory.put(saleId, selection);
 
@@ -71,10 +72,10 @@ public class BotStringSelectListener extends ListenerAdapter {
                     .setTitle(selection.getName())
                     .setDescription("")
                     .setColor(Constants.ACCENT_COLOR)
-                    .setFooter("Sold by " + event.getMember().getEffectiveName(), event.getMember().getEffectiveAvatarUrl())
+                    .setFooter("Sold by " + ScheduleManager.getName(event.getUser().getIdLong()), event.getMember().getEffectiveAvatarUrl())
                     .build())
 
-                    .addActionRow(Button.of(ButtonStyle.SUCCESS, "sale-claim-" + String.valueOf(saleId), "Claim"))
+                    .addActionRow(Button.of(ButtonStyle.SUCCESS, "sale-claim:" + String.valueOf(saleId), "Claim"))
                     .queue();
                 break;
             }

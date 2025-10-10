@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ScheduleManager {
 
@@ -29,9 +31,10 @@ public class ScheduleManager {
     private static Map<Long, Integer> rowMap;
 
     private static Map<Long, Schedule> scheduleByUser;
-    private static Set<ShiftType> bonusShiftTypes;
-    private static Map<Long, Set<ShiftType>> pickupShifts;
-    private static Set<ShiftType> questShiftTypes;
+    private static Set<Shift> bonusShifts;
+    private static Map<Long, Set<Shift>> pickupShifts;
+    private static Set<Shift> questShifts;
+    private static Logger scheduleManagerLogger1;
 
     static {
         try {
@@ -69,7 +72,8 @@ public class ScheduleManager {
         int offset = 0;
         for (List<String> row : data) {
             long discordId = Long.valueOf(row.get(1));
-            nameMap.put(discordId, row.get(0));
+
+            nameMap.put(discordId, row.get(0).split(" ")[1]);
             rowMap.put(discordId, 2 + offset);
             offset += 1;
         }
@@ -79,16 +83,16 @@ public class ScheduleManager {
         List<List<String>> dictionaryData = getRange("Workshift Dictionary!A2:D42");
 
         scheduleByUser = new HashMap<>();
-        bonusShiftTypes = new HashSet<>();
+        bonusShifts= new HashSet<>();
         pickupShifts = new TreeMap<>();
-        questShiftTypes = new HashSet<>();
+        questShifts = new HashSet<>();
 
         for (List<String> row : dictionaryData) {
             ShiftType newShiftType = new ShiftType(row.get(0), Double.valueOf(row.get(1)), "", Emoji.fromUnicode(row.get(2)), String.valueOf(row.get(3)).toLowerCase());
             ShiftType.shiftTypeRegistry.add(newShiftType);
 
             if (newShiftType.type.equals("bonus")) {
-                bonusShiftTypes.add(newShiftType);
+                bonusShifts.add(new Shift(newShiftType, Day.ANY_DAY));
             }
         }
 
@@ -99,11 +103,15 @@ public class ScheduleManager {
 
             for (Day day : Day.values()) {
                 int col = day.ordinal() + 2;
-                newSchedule.addShifts(day, row.get(col));
+                newSchedule.addShiftsFromSheet(day, row.get(col));
             }
 
             scheduleByUser.put(Long.valueOf(row.get(1)), newSchedule);
         }
+    }
+
+    public static String getName(long id) {
+        return nameMap.get(id);
     }
 
     public static List<List<String>> getRange(String range) {
@@ -124,13 +132,13 @@ public class ScheduleManager {
         return scheduleByUser.get(id);
     }
 
-    public static Set<ShiftType> getPickupShiftsFor(long id) { return pickupShifts.getOrDefault(id, new HashSet<>()); }
+    public static Set<Shift> getPickupShiftsFor(long id) { return pickupShifts.getOrDefault(id, new HashSet<>()); }
 
-    public static Set<ShiftType> getBonusShifts() { return bonusShiftTypes; }
+    public static Set<Shift> getBonusShifts() { return bonusShifts; }
 
-    public static Set<ShiftType> getQuestShifts() { return questShiftTypes; }
+    public static Set<Shift> getQuestShifts() { return questShifts; }
 
-    public static void addPickupShiftFor(long id, ShiftType s) {
+    public static void addPickupShiftFor(long id, Shift s) {
         if (pickupShifts.get(id) == null) {
             pickupShifts.put(id, new HashSet<>());
         }
@@ -138,20 +146,20 @@ public class ScheduleManager {
         pickupShifts.get(id).add(s);
     }
 
-    public static void addQuestShift(ShiftType s) {
-        questShiftTypes.add(s);
+    public static void addQuestShift(Shift s) {
+        questShifts.add(s);
     }
 
-    public static void completePickupShiftFor(long id, ShiftType s) {
-        Set<ShiftType> pickupShiftTypeSet = pickupShifts.getOrDefault(id, new HashSet<>());
+    public static void completePickupShiftFor(long id, Shift s) {
+        Set<Shift> pickupShiftTypeSet = pickupShifts.getOrDefault(id, new HashSet<>());
         pickupShiftTypeSet.remove(s);
     }
 
-    public static void completeQuestShift(ShiftType s) {
-        questShiftTypes.remove(s);
+    public static void completeQuestShift(Shift s) {
+        questShifts.remove(s);
     }
 
-    public static void verify(long id, ShiftType shiftType) throws IOException {
+    public static void verify(long id, Shift shift) throws IOException {
 
         int row = rowMap.get(id);
 
@@ -178,12 +186,12 @@ public class ScheduleManager {
         double newHours = 0;
 
         if (r.getValues() != null) {
-            newHours = Double.valueOf((String) r.getValues().get(0).get(0)) + shiftType.defaultHoursAward;
+            newHours = Double.valueOf((String) r.getValues().get(0).get(0)) + shift.getHours();
         } else {
-            newHours = shiftType.defaultHoursAward;
+            newHours = shift.getHours();
         }
 
-        String marker = "[" + String.valueOf(now.getMonthOfYear()) + "/" + String.valueOf(now.getDayOfMonth()) + " " + String.valueOf(now.getHourOfDay()) + ":" + String.valueOf(now.getMinuteOfHour()) + "] " + shiftType.getName();
+        String marker = "[" + String.valueOf(now.getMonthOfYear()) + "/" + String.valueOf(now.getDayOfMonth()) + " " + String.valueOf(now.getHourOfDay()) + ":" + String.valueOf(now.getMinuteOfHour()) + "] " + shift.getName();
         String note = "";
 
         if (s.getSheets().get(0).getData().get(0).getRowData() != null) {

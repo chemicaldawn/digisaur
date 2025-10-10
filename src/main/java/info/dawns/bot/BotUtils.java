@@ -1,12 +1,15 @@
 package info.dawns.bot;
 
 import info.dawns.Main;
+import info.dawns.scheduling.Day;
+import info.dawns.scheduling.Shift;
 import info.dawns.scheduling.ShiftType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.requests.RestAction;
 
 import java.util.Collection;
 import java.util.List;
@@ -40,16 +43,16 @@ public class BotUtils {
         return false;
     }
 
-    public static List<SelectOption> selectOptionsFor(Collection<ShiftType> shiftTypes) {
+    public static List<SelectOption> selectOptionsFor(Collection<Shift> shiftTypes) {
         List<SelectOption> optionList;
 
-        optionList = shiftTypes.stream().map((ShiftType s) -> {
+        optionList = shiftTypes.stream().map((Shift s) -> {
             return SelectOption.of(s.getName(), s.getId());
         }).toList();
 
         return optionList;
     }
-
+    
     public static String hoursString(double hours) {
         if (hours - Math.floor(hours) > 0D) {
             return String.valueOf(hours) + " hours";

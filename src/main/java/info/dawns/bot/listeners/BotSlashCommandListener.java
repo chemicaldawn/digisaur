@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 public class BotSlashCommandListener extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        BotCommand targetCommand = BotCommandRegistry.registry.get(event.getName());
+        BotCommand targetCommand = BotCommandRegistry.slashRegistry.get(event.getName());
 
         if (targetCommand != null) {
             targetCommand.apply(event);

@@ -4,6 +4,7 @@ import info.dawns.Constants;
 import info.dawns.scheduling.*;
 import info.dawns.utils.Registry;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -15,12 +16,14 @@ import net.dv8tion.jda.api.interactions.commands.build.*;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 
+import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class BotCommandRegistry {
 
-    public static Registry<BotCommand> registry = new Registry<>();
+    public static Registry<BotCommand> slashRegistry = new Registry<>();
     public static List<CommandData> apiRegistry = new ArrayList<>();
 
     public static void initializeCommands() {
@@ -47,7 +50,7 @@ public class BotCommandRegistry {
 
                 if (validVerificationMessage) {
                     Schedule userSchedule = ScheduleManager.getSchedule(id);
-                    Set<ShiftType> shiftTypeOptions = new HashSet<>();
+                    Set<Shift> shiftTypeOptions = new HashSet<>();
                     Set<SelectOption> shifts = new HashSet<>();
 
                     switch (workshiftType) {
@@ -95,8 +98,9 @@ public class BotCommandRegistry {
             }
         );
 
-        registerUserCommand(Commands.slash("sell", "Put your workshift on the market")
-                        .addOption(OptionType.STRING, "message", "The message to attach to your workshift sale", true),
+        registerOtherCommand(Commands.message("verify"));
+
+        registerUserCommand(Commands.slash("sell", "Put your workshift on the market"),
             (SlashCommandInteractionEvent e) -> {
 
                 e.reply("Select the workshift you'd like to sell...")
@@ -124,8 +128,8 @@ public class BotCommandRegistry {
                     long id = e.getUser().getIdLong();
                     String shifts = "";
 
-                    Set<ShiftType> schedule = ScheduleManager.getSchedule(id).getShiftsFor(d);
-                    for (ShiftType s : schedule) {
+                    Set<Shift> schedule = ScheduleManager.getSchedule(id).getShiftsFor(d);
+                    for (Shift s : schedule) {
                         shifts += s.getName() + "\n";
                     }
 
@@ -134,6 +138,8 @@ public class BotCommandRegistry {
                     }
                 }
 
+                builder.setFooter("Generated for " + ScheduleManager.getName(e.getUser().getIdLong()), e.getMember().getEffectiveAvatarUrl());
+
                 MessageEmbed embed = builder.build();
                 e.replyEmbeds(embed)
                         .setEphemeral(true)
@@ -141,15 +147,16 @@ public class BotCommandRegistry {
             }
         );
 
-        registerAdminCommand(Commands.slash("speak","Speak your truth queen")
+        registerSpeakingCommand(Commands.slash("speak","Speak your truth queen")
                         .addOption(OptionType.STRING, "message","#truth", true),
             (SlashCommandInteractionEvent event) -> {
-                event.getChannel().sendMessage(event.getOption("message").getAsString())
-                        .and(event.deferReply(true)).queue();
+                event.deferReply(true).complete().deleteOriginal().queue();
+                event.getChannel().sendTyping().queue();
+                event.getChannel().sendMessage(event.getOption("message").getAsString()).queueAfter(2250, TimeUnit.MILLISECONDS);
             }
         );
 
-        registerAdminCommand(Commands.slash("reply","Reply your truth queen")
+        registerSpeakingCommand(Commands.slash("reply","Reply your truth queen")
                 .addOption(OptionType.USER, "member", "Who u callin out", true)
                 .addOption(OptionType.STRING, "message","#truth", true),
             (SlashCommandInteractionEvent event) -> {
@@ -159,9 +166,9 @@ public class BotCommandRegistry {
 
                     for (Message m : messages) {
                         if (m.getAuthor().getIdLong() == member.getIdLong()) {
-                            m.reply(event.getOption("message").getAsString())
-                                    .and(event.deferReply(true))
-                                    .queue();
+                            event.deferReply(true).complete().deleteOriginal().queue();
+                            event.getChannel().sendTyping().queue();
+                            m.reply(event.getOption("message").getAsString()).queueAfter(2250, TimeUnit.MILLISECONDS);
                             return;
                         }
                     }
@@ -189,15 +196,30 @@ public class BotCommandRegistry {
         data.setContexts(InteractionContextType.GUILD);
         data.setDefaultPermissions(DefaultMemberPermissions.ENABLED);
 
-        registry.add(new BotCommand(data, consumer));
+        slashRegistry.add(new BotCommand(data, consumer));
+        apiRegistry.add(data);
+    }
+
+    public static void registerOtherCommand(CommandData data) {
+        data.setContexts(InteractionContextType.GUILD);
+        data.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
+
+        apiRegistry.add(data);
+    }
+
+    public static void registerSpeakingCommand(SlashCommandData data, Consumer<SlashCommandInteractionEvent> consumer) {
+        data.setContexts(InteractionContextType.GUILD);
+        data.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_GUILD_EXPRESSIONS));
+
+        slashRegistry.add(new BotCommand(data, consumer));
         apiRegistry.add(data);
     }
 
     public static void registerAdminCommand(SlashCommandData data, Consumer<SlashCommandInteractionEvent> consumer) {
         data.setContexts(InteractionContextType.GUILD);
-        data.setDefaultPermissions(DefaultMemberPermissions.DISABLED);
+        data.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
 
-        registry.add(new BotCommand(data, consumer));
+        slashRegistry.add(new BotCommand(data, consumer));
         apiRegistry.add(data);
     }
 }
