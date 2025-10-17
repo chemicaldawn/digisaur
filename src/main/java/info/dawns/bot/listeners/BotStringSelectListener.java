@@ -41,7 +41,7 @@ public class BotStringSelectListener extends ListenerAdapter {
                     throw new RuntimeException(e);
                 }
 
-                switch (ctx.verificationType) {
+                switch (ctx.verificationType()) {
                     case "pick-up": {
                         ScheduleManager.completePickupShiftFor(id, selection);
                         break;
@@ -58,7 +58,7 @@ public class BotStringSelectListener extends ListenerAdapter {
                 event.reply("**" + selection.getName() + "** successfully verified for " + hoursString + "!")
                         .setEphemeral(true)
                         .and(
-                                event.getChannel().addReactionById(ctx.messageId, Emoji.fromUnicode("\uD83E\uDD95")))
+                                event.getChannel().addReactionById(ctx.messageId(), Emoji.fromUnicode("\uD83E\uDD95")))
                         .queue();
                 break;
             }

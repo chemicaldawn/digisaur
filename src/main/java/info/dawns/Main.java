@@ -1,8 +1,12 @@
 package info.dawns;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.gson.Gson;
+import info.dawns.calendar.CalendarManager;
 import info.dawns.initialization.Discord;
 import info.dawns.bot.BotCommandRegistry;
+import info.dawns.initialization.Google;
 import info.dawns.initialization.scaffolding.Config;
 import info.dawns.initialization.scaffolding.DiscordCredentials;
 import info.dawns.scheduling.ScheduleManager;
@@ -11,6 +15,7 @@ import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
@@ -24,6 +29,13 @@ public class Main {
         ClassLoader loader = Main.class.getClassLoader();
         Reader reader = new InputStreamReader(loader.getResourceAsStream("config.json"));
         botConfig = (new Gson()).fromJson(reader, Config.class);
+
+        NetHttpTransport netHttpTransport = Google.getNetHttpTransport();
+        Credential googleCredentials = null;
+        try { googleCredentials = Google.getCredentials(netHttpTransport); } catch (IOException ignored) {}
+
+        ScheduleManager.initialize(netHttpTransport, googleCredentials);
+        CalendarManager.initialize(netHttpTransport, googleCredentials);
 
         CommandListUpdateAction commands = bot.updateCommands();
         BotCommandRegistry.initializeCommands();

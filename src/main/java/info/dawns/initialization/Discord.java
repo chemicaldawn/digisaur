@@ -1,6 +1,7 @@
 package info.dawns.initialization;
 
 import com.google.gson.Gson;
+import info.dawns.bot.listeners.BotAutocompleteListener;
 import info.dawns.initialization.scaffolding.DiscordCredentials;
 import info.dawns.bot.listeners.BotButtonListener;
 import info.dawns.bot.listeners.BotSlashCommandListener;
@@ -31,7 +32,7 @@ public class Discord {
         return JDABuilder.createLight(discordToken, Collections.emptyList())
                 .enableIntents(
                         GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS)
-                .addEventListeners(new BotSlashCommandListener(), new BotButtonListener(), new BotStringSelectListener())
+                .addEventListeners(new BotSlashCommandListener(), new BotButtonListener(), new BotStringSelectListener(), new BotAutocompleteListener())
                 .build();
     }
 }

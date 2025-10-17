@@ -1,23 +1,22 @@
 package info.dawns.scheduling;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
 import info.dawns.Constants;
 import info.dawns.initialization.Google;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
 public class ScheduleManager {
 
@@ -34,22 +33,8 @@ public class ScheduleManager {
     private static Set<Shift> bonusShifts;
     private static Map<Long, Set<Shift>> pickupShifts;
     private static Set<Shift> questShifts;
-    private static Logger scheduleManagerLogger1;
 
-    static {
-        try {
-            netHttpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            googleCredentials = Google.getCredentials(netHttpTransport);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+    public static void initialize(NetHttpTransport netHttpTransport, Credential googleCredentials) {
         scheduleManagerLogger.info("Connecting to the Google Sheets API");
 
         sheets = new Sheets.Builder(netHttpTransport, Google.JSON_FACTORY, googleCredentials)
@@ -128,7 +113,7 @@ public class ScheduleManager {
         }
     }
 
-    public static Schedule getSchedule(long id) {
+    public static Schedule getScheduleFor(long id) {
         return scheduleByUser.get(id);
     }
 
