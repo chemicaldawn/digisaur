@@ -37,7 +37,7 @@ public class BotCommandRegistry {
                             .addChoice("bonus", "bonus")),
             (SlashCommandInteractionEvent e) -> {
                 long id = e.getUser().getIdLong();
-                String workshiftType = e.getOption("type").getAsString();
+                VerificationType verificationType = VerificationType.valueOf(e.getOption("type").getAsString());
 
                 Message verificationMessage = BotUtils.getLatestMessageFrom(id, e.getChannel());
                 boolean validVerificationMessage = false;
@@ -53,20 +53,20 @@ public class BotCommandRegistry {
                     Set<Shift> shiftTypeOptions = new HashSet<>();
                     Set<SelectOption> shifts = new HashSet<>();
 
-                    switch (workshiftType) {
-                        case "routine":
+                    switch (verificationType) {
+                        case VerificationType.ROUTINE:
                             shiftTypeOptions = userSchedule.getAllShifts();
                             break;
-                        case "pickup":
+                        case VerificationType.PICKUP:
                             shiftTypeOptions = ScheduleManager.getPickupShiftsFor(id);
                             break;
-                        case "bonus":
+                        case VerificationType.BONUS:
                             shiftTypeOptions = ScheduleManager.getBonusShifts();
                             break;
                     }
 
                     Bot.verificationMemory.put(e.getUser().getIdLong(),
-                            new VerificationContext(verificationMessage.getIdLong(), workshiftType));
+                            new VerificationContext(verificationMessage.getIdLong(), verificationType));
 
                     if (shiftTypeOptions.size() != 0) {
                         e.reply("Choose the shift you would like to verify...")
@@ -77,7 +77,7 @@ public class BotCommandRegistry {
                                 .queue();
                     } else {
                         String message;
-                        if (workshiftType.equals("routine")) {
+                        if (verificationType.equals("routine")) {
                             message = "It looks like you don't have any shifts assigned! If you're a manager, this is to be expected.";
                         } else {
                             message = "It looks like there aren't any available shifts of that type.";
@@ -109,6 +109,9 @@ public class BotCommandRegistry {
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
                     }
+
+                    e.reply("Awarded " + String.valueOf(hours) + " hours to " + ScheduleManager.getName(user.getIdLong()) + " for **" + description + "**!")
+                            .queue();
                 }
         );
 

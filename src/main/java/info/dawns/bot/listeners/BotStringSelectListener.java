@@ -3,16 +3,14 @@ package info.dawns.bot.listeners;
 import info.dawns.Constants;
 import info.dawns.bot.Bot;
 import info.dawns.bot.BotUtils;
-import info.dawns.scheduling.ScheduleManager;
-import info.dawns.scheduling.Shift;
-import info.dawns.scheduling.ShiftType;
-import info.dawns.scheduling.VerificationContext;
+import info.dawns.scheduling.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.requests.RestAction;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,25 +39,28 @@ public class BotStringSelectListener extends ListenerAdapter {
                     throw new RuntimeException(e);
                 }
 
+                String hoursString = BotUtils.hoursString(selection.getHours());
+                verificationLogger.info(event.getUser().getEffectiveName() + " verified " + selection.getName() + " for " + hoursString);
+
+                RestAction reply = event.reply("**" + selection.getName() + "** successfully verified for " + hoursString + "!")
+                        .setEphemeral(true)
+                        .and(
+                                event.getChannel().addReactionById(ctx.messageId(), Emoji.fromUnicode("\uD83E\uDD95")));
+
                 switch (ctx.verificationType()) {
-                    case "pick-up": {
-                        ScheduleManager.completePickupShiftFor(id, selection);
+                    case VerificationType.BONUS: {
+                        reply = reply.and(event.getChannel().addReactionById(ctx.messageId(), Emoji.fromUnicode("\uD83D\uDC8E")));
                         break;
                     }
-                    case "quest": {
-                        ScheduleManager.completeQuestShift(selection);
+
+                    case VerificationType.PICKUP: {
+                        reply = reply.and(event.getChannel().addReactionById(ctx.messageId(), Emoji.fromUnicode("⬆\uFE0F")));
+                        ScheduleManager.completePickupShiftFor(id, selection);
                         break;
                     }
                 }
 
-                String hoursString = BotUtils.hoursString(selection.getHours());
-                verificationLogger.info(event.getUser().getEffectiveName() + " verified " + selection.getName() + " for " + hoursString);
-
-                event.reply("**" + selection.getName() + "** successfully verified for " + hoursString + "!")
-                        .setEphemeral(true)
-                        .and(
-                                event.getChannel().addReactionById(ctx.messageId(), Emoji.fromUnicode("\uD83E\uDD95")))
-                        .queue();
+                reply.queue();
                 break;
             }
 

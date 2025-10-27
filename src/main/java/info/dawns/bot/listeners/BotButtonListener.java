@@ -17,6 +17,7 @@ public class BotButtonListener extends ListenerAdapter {
         if (event.getComponentId().contains("sale-claim")) {
             long id = Long.valueOf(event.getComponentId().substring("sale-claim-".length()));
             Shift soldShift = Bot.marketMemory.get(id);
+            ScheduleManager.addPickupShiftFor(event.getUser().getIdLong(), soldShift);
 
             MessageEmbed embed = event.getMessage().getEmbeds().get(0);
             event.editButton(Button.secondary("claimed", "Claimed by " + ScheduleManager.getName(event.getUser().getIdLong())).asDisabled()).and(

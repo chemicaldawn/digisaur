@@ -1,4 +1,4 @@
 package info.dawns.scheduling;
 
-public record VerificationContext(long messageId, String verificationType) {
+public record VerificationContext(long messageId, VerificationType verificationType) {
 }
