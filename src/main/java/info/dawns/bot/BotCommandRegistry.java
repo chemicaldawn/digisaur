@@ -1,6 +1,7 @@
 package info.dawns.bot;
 
 import info.dawns.Constants;
+import info.dawns.calendar.CalendarManager;
 import info.dawns.scheduling.*;
 import info.dawns.utils.Registry;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -37,7 +38,7 @@ public class BotCommandRegistry {
                             .addChoice("bonus", "bonus")),
             (SlashCommandInteractionEvent e) -> {
                 long id = e.getUser().getIdLong();
-                VerificationType verificationType = VerificationType.valueOf(e.getOption("type").getAsString());
+                VerificationType verificationType = VerificationType.valueOf(e.getOption("type").getAsString().toUpperCase());
 
                 Message verificationMessage = BotUtils.getLatestMessageFrom(id, e.getChannel());
                 boolean validVerificationMessage = false;
@@ -143,14 +144,14 @@ public class BotCommandRegistry {
 
         registerUserCommand(Commands.slash("reserve", "Reserve a room of the house")
                 .addOptions(new OptionData(OptionType.STRING, "room", "The type of workshift you're verifying", true)
-                        .addChoice("guest-room", "guest-room")
                         .addChoice("projector-room", "projector-room")
                         .addChoice("patio", "patio"))
-                .addOption(OptionType.STRING, "description", "Event description", true)
-                .addOption(OptionType.STRING, "starting", "The starting date and time and date to reserve for", true)
-                .addOption(OptionType.STRING, "duration", "The duration, in hours, of the event", false)
-                .addOption(OptionType.STRING, "ending", "The starting date and time and date to reserve for", false),
-                (SlashCommandInteractionEvent e) -> {
+                .addOption(OptionType.STRING, "description", "A description of the event", true)
+                .addOption(OptionType.INTEGER, "month", "The numerical month (ex. 8 for August)", true)
+                .addOption(OptionType.INTEGER, "day", "The numerical day of the month", true)
+                .addOption(OptionType.STRING, "start-time", "The start time of the reservation, in 12-hour format", true)
+                .addOption(OptionType.STRING, "end-time", "The end time of the reservation, in 12-hour format", true),
+            (SlashCommandInteractionEvent e) -> {
 
             }
         );
