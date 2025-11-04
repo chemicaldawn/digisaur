@@ -45,6 +45,10 @@ public class Shift {
         return this.hoursAward;
     }
 
+    public boolean isCentral() {
+        return this.type.isCentral();
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other instanceof Shift otherShift) {

@@ -34,6 +34,7 @@ public class BotCommandRegistry {
             Commands.slash("verify", "Verify your workshift automatically!")
                     .addOptions(new OptionData(OptionType.STRING, "type", "The type of workshift you're verifying", true)
                             .addChoice("routine", "routine")
+                            .addChoice("central","central")
                             .addChoice("pick-up", "pickup")
                             .addChoice("bonus", "bonus")),
             (SlashCommandInteractionEvent e) -> {
@@ -44,25 +45,30 @@ public class BotCommandRegistry {
                 boolean validVerificationMessage = false;
 
                 if (verificationMessage != null) {
-                    if (!verificationMessage.getAttachments().isEmpty() && !BotUtils.isAcknowledged(verificationMessage)) {
-                        validVerificationMessage = true;
+                    if (!BotUtils.isAcknowledged(verificationMessage)) {
+                        if (!verificationMessage.getAttachments().isEmpty() || verificationType.equals(VerificationType.CENTRAL)) {
+                            validVerificationMessage = true;
+                        }
                     }
                 }
 
                 if (validVerificationMessage) {
                     Schedule userSchedule = ScheduleManager.getScheduleFor(id);
-                    Set<Shift> shiftTypeOptions = new HashSet<>();
-                    Set<SelectOption> shifts = new HashSet<>();
+                    List<Shift> shiftTypeOptions = new ArrayList<>();
+                    List<SelectOption> shifts = new ArrayList<>();
 
                     switch (verificationType) {
                         case VerificationType.ROUTINE:
-                            shiftTypeOptions = userSchedule.getAllShifts();
+                            shiftTypeOptions = userSchedule.getAllShifts().stream().filter((Shift s) -> !s.isCentral()).toList();
+                            break;
+                        case VerificationType.CENTRAL:
+                            shiftTypeOptions = userSchedule.getAllShifts().stream().filter((Shift s) -> s.isCentral()).toList();
                             break;
                         case VerificationType.PICKUP:
-                            shiftTypeOptions = ScheduleManager.getPickupShiftsFor(id);
+                            shiftTypeOptions = ScheduleManager.getPickupShiftsFor(id).stream().toList();
                             break;
                         case VerificationType.BONUS:
-                            shiftTypeOptions = ScheduleManager.getBonusShifts();
+                            shiftTypeOptions = ScheduleManager.getBonusShifts().stream().toList();
                             break;
                     }
 

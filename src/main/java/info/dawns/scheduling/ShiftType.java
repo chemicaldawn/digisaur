@@ -57,6 +57,10 @@ public class ShiftType implements RegistryItem {
         return name.toLowerCase(Locale.ROOT).replaceAll("\\s+\\+?\\s*","-");
     }
 
+    public boolean isCentral() {
+        return this.id.contains("central");
+    }
+
     public String toString() {
         return name;
     }
