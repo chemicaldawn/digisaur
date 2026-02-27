@@ -52,7 +52,7 @@ public class ScheduleManager {
     private static void buildNameMap() {
         nameMap = new HashMap<>();
         rowMap = new HashMap<>();
-        List<List<String>> data = getRange("Workshift Tracker!A3:B36");
+        List<List<String>> data = getRange("Workshift Tracker!A3:B37");
 
         int offset = 0;
         for (List<String> row : data) {
@@ -149,7 +149,7 @@ public class ScheduleManager {
         int row = rowMap.get(id);
 
         DateTime now = DateTime.now();
-        DateTime start = new DateTime(2025, 8, 25, 0, 1);
+        DateTime start = new DateTime(2026, 1, 20, 0, 1);
         Duration diff = new Duration(start, now);
 
         int weekOn = (int) diff.getStandardDays() / 7;
